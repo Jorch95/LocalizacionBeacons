@@ -2,32 +2,6 @@
 from flask import Flask
 from flask import request
 from flask import render_template
-<<<<<<< HEAD
-from readfile import devolverValores
-from muestra import Muestra
-
-web = Flask(__name__, static_url_path='/static')
-
-IDBeacon = "0000"
-def existeID():
-    global IDBeacon
-    suma = Muestra(0, 0, 0, 0)
-    if IDBeacon == "1234":
-        auxExiste = True
-    else:
-        auxExiste = False
-    return auxExiste
-
-@web.route('/')
-def index():
-    # IDBeacon = 1234
-    # existe = False
-    dist = 10
-    rssi = 3
-    existe = existeID()
-    print IDBeacon
-    print existe
-=======
 from tinydb import TinyDB, where
 from time import time
 from math import sqrt
@@ -83,7 +57,6 @@ def index():
         rssi = muestra['RSSI']
         dist = calculoDistancia(muestra['RSSI'])
         #TODO agregar escala cerca-medio-lejos
->>>>>>> 5fd06225daf62e8589fab649894a9b3ccf25d8dc
     return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssi , existe=existe)
 
 @web.route('/', methods = ['POST'])
