@@ -57,12 +57,12 @@
                                   <input type="text" class="form-control" id="ID" name="ID" placeholder="Ingrese ID">
                                 </div>
                                 <div class="form-group">
-                                        <label for="sel1">Cantidad de muestras</label>
-                                        <select class="form-control" id="cantM", name="cantM">
-                                                <option>1</option>
-                                                <option>10</option>
-                                                <option>50</option>
-                                                <option>100</option>
+                                        <label for="sel1">Intervalo de muestreo</label>
+                                        <select class="form-control" id="seg", name="seg">
+                                                <option>1 seg</option>
+                                                <option>3 seg</option>
+                                                <option>5 seg</option>
+                                                <option>10 seg</option>
                                         </select>
                                 <button type="submit" class="btn btn-success">Aceptar</button>
                               </form>
@@ -73,7 +73,7 @@
 
         {% if existe %}
         <div class="container-fluid">
-                <h2>Datos del objeto {} </h2>
+                <h2>Datos del objeto {{IDBeacon}} </h2>
                 <div class="table-responsive">
                 <table class="table table-condensed">
                 <thead>
@@ -84,7 +84,7 @@
                 </thead>
                 <tbody>
                         <tr>
-                        <th>ID={{1234}}</th>
+                        <th>ID = {{IDBeacon}}</th>
                                 <td>{{rssi}}</td>
                                 <td>{{distancia}}</td>
                                 <td>{{acercamiento}}</td>
@@ -95,6 +95,8 @@
                 </table>
                 </div>
         </div>
+        {% elif IDBeacon != "00000000" and existe == False %}
+        <h2>El ID ingresado no se encuentra en nuestro Sistema.</h2>
         {%endif%}
 </body>
 </html>
