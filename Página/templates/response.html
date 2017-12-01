@@ -8,7 +8,7 @@
         <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
-        <!-- <meta http-equiv="refresh" content="{{frec}}">  -->
+        <meta http-equiv="refresh" content="5">
         <title>BLE</title>
         <style>
         .navbar-inverse {
@@ -59,10 +59,10 @@
                                 <div class="form-group">
                                         <label for="sel1">Intervalo de muestreo</label>
                                         <select class="form-control" id="seg", name="seg">
-                                                <option value=1>1 seg</option>
-                                                <option value=3>3 seg</option>
+                                                <option value=2>2 seg</option>
                                                 <option value=5>5 seg</option>
-                                                <option value=1512016744>10 seg</option>
+                                                <option value=10>10 seg</option>
+                                                <option value=20>20 seg</option>
                                         </select>
                                 <button type="submit" class="btn btn-success">Aceptar</button>
                               </form>
@@ -71,23 +71,28 @@
         <br>
         <br>
 
-        {% if existe %}
+        {% if rssi > 0 %}
         <div class="container-fluid">
                 <h2>Datos del objeto {{IDBeacon}} </h2>
                 <div class="table-responsive">
                 <table class="table table-condensed">
                 <thead>
-                        <th>#</th>
+                        <th>ID</th>
                         <th>Fuerza de la señal (RSSI)</th>
                         <th>Distancia</th>
                         <th>Acercamiento</th>
                 </thead>
                 <tbody>
                         <tr>
-                        <th>ID = {{IDBeacon}}</th>
+                        <th>{{IDBeacon}}</th>
                                 <td>{{rssi}}</td>
+                                {% if distancia != 99999.99 %}
                                 <td>{{distancia}}</td>
                                 <td>{{acercamiento}}</td>
+                                {% else %}
+                                <td> Desconocida </td>
+                                <td> Desconocido </td>
+                                {%endif%}
                         </th>
                         </tr>
                         <tr>
@@ -95,7 +100,7 @@
                 </table>
                 </div>
         </div>
-        {% elif IDBeacon != "00000000" and existe == False %}
+        {% elif IDBeacon != "00000000" and rssi == 0 %}
         <h2>El ID ingresado no se encuentra en nuestro Sistema.</h2>
         {%endif%}
 </body>

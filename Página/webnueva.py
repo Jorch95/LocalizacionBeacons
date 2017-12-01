@@ -13,54 +13,54 @@ web = Flask(__name__, static_url_path='/static')
 tabla = db.table('tabla')
 tablaReferencias = db.table('referencias')
 IDBeacon = "00000000" # Se usa para que no muestre nada apenas se entra en la página.
-intervalo = 0.0
+intervalo = 100000.0
 
 def obtenerReferenciaRSSSI():
     #leer desde archivo o calcular con muestras actuales
-    return 67
+    return 60
 
-def obtenerPromedioRSSI(intervalo):
+def obtenerPromedioRSSI():
+    global IDBeacon
+    global intervalo
     registros = tabla.search((where('ID') == IDBeacon) & (where('segundos') > (time() - float(intervalo))))
     suma = 0
     cant = 0
     for registro in registros:
-        suma += registro['RSSI']
+        suma += int(registro['RSSI'])
         cant += 1
-    print cant
-    print suma
+
     if cant > 0:
-        return suma/float(cant)
+        return float(suma)/float(cant)
     else:
         return 0
 
 def calculoDistancia(rssiPromedio, rssiReferencia):
     distReferencia = 1.0
-    dist = distReferencia / sqrt(rssiPromedio/rssiReferencia)
+    dist = sqrt(rssiPromedio/rssiReferencia)
     return dist
 
 @web.route('/')
 def index():
+    global IDBeacon
     calibrado = False
-    rssiPromedio = obtenerPromedioRSSI(intervalo)
-    rssiReferencia = obtenerReferenciaRSSSI(IDBeacon)
+    dist = 99999.99
+    rssiPromedio = obtenerPromedioRSSI()
+    rssiReferencia = obtenerReferenciaRSSSI()
     if rssiReferencia > 0:
         calibrado = True
-    if rssiPromedio > 0:
-        dist = calculoDistancia(rssiPromedio, rssiReferencia)
-        #TODO agregar escala cerca-medio-lejos
-        if rssi > 0:
-            return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , existe=True, calibrado=calibrado)
-    else:
-        return render_template('response.html', IDBeacon=IDBeacon, distancia="Desconocida", rssi=rssiPromedio , existe=False, calibrado=calibrado)
+        if rssiPromedio > 0:
+            dist = calculoDistancia(rssiPromedio, rssiReferencia)
+    #TODO agregar escala cerca-medio-lejos
+    return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , calibrado=calibrado)
 
 @web.route('/', methods = ['POST'])
 def action_form():
     if request.method == 'POST':
         # global IDBeacon
         data = request.form
-        global IDBeacons
-        IDBeacon = data["ID"]
+        global IDBeacon
         global intervalo
+        IDBeacon = data["ID"]
         intervalo = data["seg"]
     return index()
 
