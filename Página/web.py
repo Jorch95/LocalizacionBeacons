@@ -5,59 +5,56 @@ from flask import render_template
 from tinydb import TinyDB, where
 from time import time
 from math import sqrt
+from random import randrange
 
 db = TinyDB('db.db')
 
 web = Flask(__name__, static_url_path='/static')
 
 tabla = db.table('tabla')
+tablaReferencias = db.table('referencias')
 IDBeacon = "00000000" # Se usa para que no muestre nada apenas se entra en la página.
-existe = False
-# def existeID():
-#     global IDBeacon
-#     if IDBeacon == "12345678":
-#         auxExiste = True
-#     else:
-#         auxExiste = False
-#     return auxExiste
+intervalo = 100000.0
 
-def consultarID():
+def obtenerReferenciaRSSSI():
+    #leer desde archivo o calcular con muestras actuales
+    return 60
+
+def obtenerPromedioRSSI():
     global IDBeacon
-    global existe
-    auxID = tabla.get(eid=200) #Esto está simplemente para que no haya problemas de compilación. Esto no se muestra, después se arregla.
-    existeID = tabla.contains(where('ID') == IDBeacon)
-    if existeID: #encontró
-        # auxID = tabla.search(where('segundos') > (time() - 10)) Esto usaríamos generando los valores.
-        # No pude usar esto porque el tiempo que toma en segundos como referencia el módulo time()
-        # en segundos es demasiado grande en comparación a los creados en la db.
-        # Calculo que justamente generandose los valores en tiempo real, no pase esto.
-        auxID = tabla.get(eid=15) #Los valores de este id son los que se muestran.
-        existe = True
-    return auxID
+    global intervalo
+    #registros = tabla.search((where('ID') == IDBeacon) & (where('segundos') > (time() - float(intervalo))))
+    IDBeacon = "12345678"
+    suma = 0
+    cant = 0
+    #for registro in registros:
+    #    suma += int(registro['RSSI'])
+    #    cant += 1
+    suma += randrange(0,100)
+    cant += 1
+    if cant > 0:
+        return float(suma)/float(cant)
+    else:
+        return 0
 
-intensidad1= 10.0 #Intensidad de referencia 1 por poner un valor (Sería la de referencia a un metro).
-distRf = 1.0 # Distancia de referencia, o calibración, que es un metro.
-
-def calculoDistancia(rssi): #Función de ejemplo del cálculo de la distancia.
-    global intensidad1
-    global distRf
-    rssiN = float(rssi) #Pasa del tipo unicode a float
-    dist = (distRf/(sqrt((rssiN/intensidad1))))
+def calculoDistancia(rssiPromedio, rssiReferencia):
+    distReferencia = 1.0
+    dist = sqrt(rssiPromedio/rssiReferencia)
     return dist
 
 @web.route('/')
 def index():
-    # existe = existeID()
-    dist = 1 # Valores arbitrarios para que no haya error de compilación
-    rssi = 100 # Lo mismo que arriba.
     global IDBeacon
-    muestra = consultarID()
-    if existe:
-        IDBeacon = muestra['ID']
-        rssi = muestra['RSSI']
-        dist = calculoDistancia(muestra['RSSI'])
-        #TODO agregar escala cerca-medio-lejos
-    return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssi , existe=existe)
+    calibrado = False
+    dist = 99999.99
+    rssiPromedio = obtenerPromedioRSSI()
+    rssiReferencia = obtenerReferenciaRSSSI()
+    if rssiReferencia > 0:
+        calibrado = True
+        if rssiPromedio > 0:
+            dist = calculoDistancia(rssiPromedio, rssiReferencia)
+    #TODO agregar escala cerca-medio-lejos
+    return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , calibrado=calibrado, intervalo=intervalo)
 
 @web.route('/', methods = ['POST'])
 def action_form():
@@ -65,7 +62,9 @@ def action_form():
         # global IDBeacon
         data = request.form
         global IDBeacon
+        global intervalo
         IDBeacon = data["ID"]
+        intervalo = data["seg"]
     return index()
 
 if __name__ == "__main__":

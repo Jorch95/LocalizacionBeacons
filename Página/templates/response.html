@@ -49,59 +49,88 @@
                 <img src="bird.jpg" class="img-responsive img-circle margin" style="display:inline" alt="BLE" width="350" height="350">
         </div> Tengo que agregar  -->
 
-        <div class="container-fluid">
-                <h3>Ingrese ID</h3>
-                <form class="form-inline" action="/" method="POST">
-                                <div class="form-group">
-                                  <label for="ID">ID:</label>
-                                  <input type="text" class="form-control" id="ID" name="ID" placeholder="Ingrese ID">
-                                </div>
-                                <div class="form-group">
-                                        <label for="sel1">Intervalo de muestreo</label>
-                                        <select class="form-control" id="seg", name="seg">
-                                                <option value=2>2 seg</option>
-                                                <option value=5>5 seg</option>
-                                                <option value=10>10 seg</option>
-                                                <option value=20>20 seg</option>
-                                        </select>
-                                <button type="submit" class="btn btn-success">Aceptar</button>
+        <div class="container">
+                <div class="row">                                        
+                        <div class="col-sm-8">           
+                                <h3>Ingrese ID</h3>
+                                <form class="form-inline" action="/" method="POST">
+                                        <div class="form-group">
+                                                <label for="ID">ID:</label>
+                                                <input type="text" class="form-control" id="ID" name="ID" placeholder="Ingrese ID">
+                                        </div>
+                                        <div class="form-group">
+                                                <label for="sel1">Intervalo de muestreo</label>
+                                                <select class="form-control" id="seg", name="seg">
+                                                        <option value=2>2 seg</option>
+                                                        <option value=5>5 seg</option>
+                                                        <option value=10>10 seg</option>
+                                                        <option value=20>20 seg</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-success">Aceptar</button>
+                                        </div>
                               </form>
+                        </div>
+
+                        <!-- <div class="col-sm-4">  
+                                <h3>Calibre su objeto</h3>         
+                                <form class="form-inline" action="/" method="POST">
+                                        <div class="form-group">
+                                                <label for="IDC">ID:</label>
+                                                <input type="text" class="form-control" id="IDC" name="IDC" placeholder="Ingrese ID a calibrar">
+                                        </div>
+                                        <button type="submit" class="btn btn-info">Calibrar!</button>
+                                </form>
+                        </div>                                         -->
+                </div>
         </div>
 
         <br>
         <br>
 
         {% if rssi > 0 %}
-        <div class="container-fluid">
+        <div id="tablaRefresh" class="container-fluid">
                 <h2>Datos del objeto {{IDBeacon}} </h2>
-                <div class="table-responsive">
-                <table class="table table-condensed">
-                <thead>
-                        <th>ID</th>
-                        <th>Fuerza de la señal (RSSI)</th>
-                        <th>Distancia</th>
-                        <th>Acercamiento</th>
-                </thead>
-                <tbody>
-                        <tr>
-                        <th>{{IDBeacon}}</th>
-                                <td>{{rssi}}</td>
-                                {% if distancia != 99999.99 %}
-                                <td>{{distancia}}</td>
-                                <td>{{acercamiento}}</td>
-                                {% else %}
-                                <td> Desconocida </td>
-                                <td> Desconocido </td>
-                                {%endif%}
-                        </th>
-                        </tr>
-                        <tr>
-                </tbody>
-                </table>
+                <div id="tablaRefresh" class="table-responsive">
+                        <table class="table table-condensed">
+                        <thead>
+                                <th>ID</th>
+                                <th>Fuerza de la señal (RSSI)</th>
+                                <th>Distancia</th>
+                                <th>Acercamiento</th>
+                        </thead>
+                        <tbody>
+                                <tr>
+                                <th>{{IDBeacon}}</th>
+                                        <td>{{rssi}}</td>
+                                        {% if distancia != 99999.99 %}
+                                        <td>{{distancia}}</td>
+                                        <td>{{acercamiento}}</td>
+                                        {% else %}
+                                        <td> Desconocida </td>
+                                        <td> Desconocido </td>
+                                        {%endif%}
+                                </th>
+                                </tr>
+                        </tbody>
+                        </table>
+                         <!-- Refresco de tabla con JQuery y ajax -->
+                        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>                 
+                        <script type="text/javascript">
+                        $(document).ready(function () {
+                                refresh();
+                        });
+                        function refresh() {
+                                setTimeout(function () {
+                                        $('#tablaRefresh').load(' #tablaRefresh');
+                                        refresh();
+                                }, {{intervalo}}*1000);
+                        }
+                </script>
                 </div>
-        </div>
+       </div>
         {% elif IDBeacon != "00000000" and rssi == 0 %}
         <h2>El ID ingresado no se encuentra en nuestro Sistema.</h2>
         {%endif%}
+        
 </body>
 </html>

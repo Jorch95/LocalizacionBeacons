@@ -51,12 +51,11 @@ def index():
         if rssiPromedio > 0:
             dist = calculoDistancia(rssiPromedio, rssiReferencia)
     #TODO agregar escala cerca-medio-lejos
-    return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , calibrado=calibrado)
+    return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , calibrado=calibrado, intervalo=intervalo)
 
 @web.route('/', methods = ['POST'])
 def action_form():
     if request.method == 'POST':
-        # global IDBeacon
         data = request.form
         global IDBeacon
         global intervalo
