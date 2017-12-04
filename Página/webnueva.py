@@ -14,9 +14,12 @@ tabla = db.table('tabla')
 tablaReferencias = db.table('referencias')
 IDBeacon = "00000000" # Se usa para que no muestre nada apenas se entra en la página.
 intervalo = 100000.0
+IDCalibrado = "00000000" #Se usa para ver la funcionalidad del botón calibrar.
 
 def obtenerReferenciaRSSSI():
     #leer desde archivo o calcular con muestras actuales
+    if IDCalibrado == "00000000":
+        return 0
     return 60
 
 def obtenerPromedioRSSI():
@@ -51,7 +54,7 @@ def index():
         if rssiPromedio > 0:
             dist = calculoDistancia(rssiPromedio, rssiReferencia)
     #TODO agregar escala cerca-medio-lejos
-    return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , calibrado=calibrado, intervalo=intervalo)
+    return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , calibrado=calibrado, intervalo=intervalo, IDCalibrado = IDCalibrado)
 
 @web.route('/', methods = ['POST'])
 def action_form():
