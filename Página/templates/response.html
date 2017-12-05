@@ -5,10 +5,10 @@
         <!-- Bootstrap -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <!-- JS, Popper and JQuery-->
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
-         <!-- <meta http-equiv="refresh" content="5">  -->
+        <!-- <meta http-equiv="refresh" content="5">  -->
         <title>BLE</title>
         <style>
         .navbar-inverse {
@@ -24,7 +24,21 @@
         <script type="text/javascript">
                 function actualizar() {
                 alert("Calibrando");
-                setTimeout(aviso,5000)
+                        console.log("click");
+                debugger;
+                a=$('#IDCalibrar').val();
+                $.ajax({
+                        method: 'POST',
+                        url: '/calibrador',
+                        data: {
+                                'IDCalibrar': a
+                        },
+                dataType: "json",
+                success: function(response) {
+                        $('#outputR').val(response.resultado);
+                }
+                 }); 
+                // setTimeout(aviso,5000)
                 }
                 function aviso(){
                         window.location.reload();
@@ -97,9 +111,9 @@
                               <!-- <div id="division">
                                         En esta división (elemento id="division") voy a guardar datos con la función data y luego los voy a leer
                                 </div> -->
-                              <form name="formul">
-                                        <button id="boton" type="button" class="btn btn-info" onclick="actualizar()">Calibrar!</button>
-                                </form>
+                                <input type="text" id="IDCalibrar" placeholder="Ingrese ID a calibrar"></input>
+                                <button id="boton" type="button" class="btn btn-info" onclick="actualizar()">Calibrar!</button>
+                               
                               <!-- <input type="button" value="refrescar" onclick="javascript:window.location.reload();"/> -->
                         </div>
                 </div>
@@ -135,8 +149,7 @@
                         </tbody>
                         </table>
                          <!-- Refresco de tabla con JQuery y ajax -->
-                         <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-                         <script type="text/javascript">
+                         <!-- <script type="text/javascript">
                                 $(document).ready(function () {
                                         refresh();
                                 });
@@ -146,14 +159,12 @@
                                                 refresh();
                                         },2000);
                                 }
-                        </script>
+                        </script> -->
                 </div>
        </div>
         {% elif IDBeacon != "00000000" and rssi == 0 and calibrado == False%}
         <h2>El ID ingresado no se encuentra en nuestro Sistema.</h2>
         <h3>Calibre su Beacon en el sistema.</h3>
-        {% elif IDBeacon != "00000000" %}
-        <h2>Calibrando...</h2>
-        {%endif%}
+        {%endif%}       
 </body>
 </html>
