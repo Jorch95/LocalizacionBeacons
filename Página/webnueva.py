@@ -3,8 +3,8 @@ from flask import Flask
 from flask import request
 from flask import render_template
 from tinydb import TinyDB, where
-from time import time
 from math import sqrt
+import time
 
 db = TinyDB('db.db')
 
@@ -46,7 +46,7 @@ def calculoDistancia(rssiPromedio, rssiReferencia):
 #se toman muestras del RSSI de "ID" durante 15seg, se calcula su promedio y se lo guarda en la tabla de referencias de RSSIs
 #devuelve el valor de referencia almacenado por si acaso sea de utilidad
 def calibrar(ID):
-    delay(15)
+    time.sleep(15)
     rssiPromedio = obtenerPromedioRSSI(ID, 15)
     tablaReferencias.insert({'ID': ID, 'RSSIref': rssiPromedio})
     return rssiPromedio

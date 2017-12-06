@@ -3,9 +3,9 @@ from flask import Flask
 from flask import request
 from flask import render_template
 from tinydb import TinyDB, where
-from time import time
 from math import sqrt
 import json
+import time
 
 db = TinyDB('db.db')
 
@@ -15,19 +15,21 @@ tabla = db.table('tabla')
 tablaReferencias = db.table('referencias')
 IDBeacon = "00000000" # Se usa para que no muestre nada apenas se entra en la página.
 intervalo = 100000.0
-IDCalibrado = "00000000" #Se usa para ver la funcionalidad del botón calibrar.
+IDCalibrado = "abcdefgh" #Se usa para ver la funcionalidad del botón calibrar.
+rssiReferencia = 51 #Para que no aparezca al principio que no hay ningún ID calibrado.
+rssiPromedio = 51 #Para que no aparezca al principio que no hay ningún ID calibrado con promedio.
 
 #busca el "ID" recibido en la tabla de referencias. si lo encuentra lo devuelve, sino devuelve 0 (seria ilogico que un RSSI de ref sea 0).
 def obtenerReferenciaRSSSI(ID):
     referencia = tablaReferencias.search(where('ID') == ID)
     if len(referencia) == 1:
-        return referencia['RSSIref']
+        return referencia[0]
     else:
-        return 51
+        return 0
 
 #calcula el promedio de RSSIs escaneados correspondientes a "ID" en un lapso de "duracion"
 def obtenerPromedioRSSI(ID, duracion):
-    registros = tabla.search((where('ID') == ID & (where('segundos') > (time() - float(duracion))))
+    registros = tabla.search((where('ID') == ID) & (where('segundos') > (time() - float(duracion)))) 
     suma = 0
     cant = 0
     for registro in registros:
@@ -47,24 +49,27 @@ def calculoDistancia(rssiPromedio, rssiReferencia):
 #se toman muestras del RSSI de "ID" durante 15seg, se calcula su promedio y se lo guarda en la tabla de referencias de RSSIs
 #devuelve el valor de referencia almacenado por si acaso sea de utilidad
 def calibrar(ID):
-    sleep(15)
+    time.sleep(15)
     rssiPromedio = obtenerPromedioRSSI(ID, 15)
     tablaReferencias.insert({'ID': ID, 'RSSIref': rssiPromedio})
-    return rssiPromedio
+    global rssiReferencia
+    return index()
 
 @web.route('/')
 def index():
     global IDBeacon
     global intervalo
-    IDBeacon = "12345678"
+    global IDCalibrado
+    global rssiReferencia
+    global rssiPromedio 
     calibrado = False
     dist = 99999.99
     rssiPromedio = obtenerPromedioRSSI(IDBeacon, intervalo)
     rssiReferencia = obtenerReferenciaRSSSI(IDBeacon)
     if rssiReferencia > 0:
         calibrado = True
-        if rssiPromedio > 0:
-            dist = calculoDistancia(rssiPromedio, rssiReferencia)
+    if rssiPromedio > 0:
+        dist = calculoDistancia(rssiPromedio, rssiReferencia)
     #TODO agregar escala cerca-medio-lejos
     return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , calibrado=calibrado, intervalo=intervalo, IDCalibrado = IDCalibrado)
 
@@ -81,12 +86,12 @@ def action_form():
 @web.route('/calibrador', methods = ['POST'])
 def calirbador():
     if request.method == 'POST':
-        a = request.json.POST['IDCalibrar']
+        global IDBeacon
         global IDCalibrado
-        IDCalibrado = a
-        return index()  #JsonResponse({ resultado: a })
-    else:
-        return HttpResponse("Peticion no valida")
+        IDCalibrado = IDBeacon
+        return calibrar(IDCalibrado)  #JsonResponse({ resultado: a })
+    # else:
+    #     return HttpResponse("Peticion no valida")
 
 if __name__ == "__main__":
     # Define HOST y PUERTO para accerder
