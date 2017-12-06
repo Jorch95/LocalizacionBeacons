@@ -1,6 +1,6 @@
 import serial
 from tinydb import TinyDB, where
-from time import time
+import time
 import signal, sys
 
 db = TinyDB('db.db')
@@ -15,16 +15,21 @@ signal.signal(signal.SIGINT, handler)
 
 db.purge_tables()
 tabla = db.table('tabla')
+timeout = time.time()
 
 while True:
     while (arduino.inWaiting() == 0):
-        pass
+        time.sleep(0.01)
     ID = arduino.readline().strip()
-    
-    segundos = time()
+
+    segundos = time.time()
 
     while (arduino.inWaiting() == 0):
-        pass
+        time.sleep(0.01)
     RSSI = arduino.readline().strip()
 
     tabla.insert({'ID': ID, 'RSSI': RSSI, 'segundos': segundos})
+
+    #if (segundos - timeout) > 25:
+    #    tabla.remove(where('segundos') < (segundos - 25))
+    #    timeout = segundos

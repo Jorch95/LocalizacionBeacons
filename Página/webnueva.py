@@ -3,7 +3,7 @@ from flask import Flask
 from flask import request
 from flask import render_template
 from tinydb import TinyDB, where
-from time import time
+import time
 from math import sqrt
 
 db = TinyDB('db.db')
@@ -18,6 +18,7 @@ IDCalibrado = "00000000" #Se usa para ver la funcionalidad del botón calibrar.
 
 #busca el "ID" recibido en la tabla de referencias. si lo encuentra lo devuelve, sino devuelve 0 (seria ilogico que un RSSI de ref sea 0).
 def obtenerReferenciaRSSSI(ID):
+    referencia = []
     referencia = tablaReferencias.search(where('ID') == ID)
     if len(referencia) == 1:
         return referencia['RSSIref']
@@ -26,7 +27,8 @@ def obtenerReferenciaRSSSI(ID):
 
 #calcula el promedio de RSSIs escaneados correspondientes a "ID" en un lapso de "duracion"
 def obtenerPromedioRSSI(ID, duracion):
-    registros = tabla.search((where('ID') == ID) & (where('segundos') > (time() - float(duracion))))
+    registros = []
+    registros = tabla.search((where('ID') == ID) & (where('segundos') > (time.time() - float(duracion))))
     suma = 0
     cant = 0
     for registro in registros:
@@ -39,17 +41,19 @@ def obtenerPromedioRSSI(ID, duracion):
 
 def calculoDistancia(rssiPromedio, rssiReferencia):
     distReferencia = 1.0
-    dist = sqrt(rssiPromedio/rssiReferencia)
+    ##dist = 10. ** ((rssiReferencia - rssiPromedio) / 40)
+    dist = 25
     return dist
 
 #al llamar a este metodo se asume que el celular esta a 1m.
 #se toman muestras del RSSI de "ID" durante 15seg, se calcula su promedio y se lo guarda en la tabla de referencias de RSSIs
 #devuelve el valor de referencia almacenado por si acaso sea de utilidad
-def calibrar(ID):
-    delay(15)
-    rssiPromedio = obtenerPromedioRSSI(ID, 15)
+def calibrar():
+    global IDBeacon
+    time.sleep(15)
+    rssiPromedio = obtenerPromedioRSSI(IDBeacon, 15)
+    tablaReferencias.remove(where('ID') == ID)
     tablaReferencias.insert({'ID': ID, 'RSSIref': rssiPromedio})
-    return rssiPromedio
 
 @web.route('/')
 def index():
