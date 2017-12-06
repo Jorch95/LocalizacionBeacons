@@ -30,6 +30,7 @@ while True:
 
     tabla.insert({'ID': ID, 'RSSI': RSSI, 'segundos': segundos})
 
-    #if (segundos - timeout) > 25:
-    #    tabla.remove(where('segundos') < (segundos - 25))
-    #    timeout = segundos
+    #cada 60 segundos, se borraran las muestras tomadas hace mas de 60 segundos
+    if (segundos - timeout) > 60:
+        tabla.remove(where('segundos') < (segundos - 60))
+        timeout = segundos

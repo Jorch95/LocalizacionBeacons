@@ -18,16 +18,14 @@ IDCalibrado = "00000000" #Se usa para ver la funcionalidad del botón calibrar.
 
 #busca el "ID" recibido en la tabla de referencias. si lo encuentra lo devuelve, sino devuelve 0 (seria ilogico que un RSSI de ref sea 0).
 def obtenerReferenciaRSSSI(ID):
-    referencia = []
     referencia = tablaReferencias.search(where('ID') == ID)
     if len(referencia) == 1:
-        return referencia['RSSIref']
+        return referencia[0]['RSSIref']
     else:
-        return 51
+        return 0
 
 #calcula el promedio de RSSIs escaneados correspondientes a "ID" en un lapso de "duracion"
 def obtenerPromedioRSSI(ID, duracion):
-    registros = []
     registros = tabla.search((where('ID') == ID) & (where('segundos') > (time.time() - float(duracion))))
     suma = 0
     cant = 0
@@ -41,19 +39,18 @@ def obtenerPromedioRSSI(ID, duracion):
 
 def calculoDistancia(rssiPromedio, rssiReferencia):
     distReferencia = 1.0
-    ##dist = 10. ** ((rssiReferencia - rssiPromedio) / 40)
-    dist = 25
+    dist = 10. ** ((rssiPromedio - rssiReferencia) / 40)
     return dist
 
 #al llamar a este metodo se asume que el celular esta a 1m.
-#se toman muestras del RSSI de "ID" durante 15seg, se calcula su promedio y se lo guarda en la tabla de referencias de RSSIs
+#se toman muestras del RSSI de "ID" durante 40seg, se calcula su promedio y se lo guarda en la tabla de referencias de RSSIs
 #devuelve el valor de referencia almacenado por si acaso sea de utilidad
-def calibrar():
-    global IDBeacon
-    time.sleep(15)
-    rssiPromedio = obtenerPromedioRSSI(IDBeacon, 15)
+def calibrar(ID):
+    time.sleep(40)
+    rssiPromedio = obtenerPromedioRSSI(ID, 40)
     tablaReferencias.remove(where('ID') == ID)
     tablaReferencias.insert({'ID': ID, 'RSSIref': rssiPromedio})
+    return index()
 
 @web.route('/')
 def index():
@@ -68,7 +65,7 @@ def index():
         if rssiPromedio > 0:
             dist = calculoDistancia(rssiPromedio, rssiReferencia)
     #TODO agregar escala cerca-medio-lejos
-    return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , calibrado=calibrado, intervalo=intervalo, IDCalibrado = IDCalibrado)
+    return render_template('response.html', IDBeacon=IDBeacon, distancia=dist, rssi=rssiPromedio , calibrado=calibrado)
 
 @web.route('/', methods = ['POST'])
 def action_form():
@@ -78,7 +75,13 @@ def action_form():
         global intervalo
         IDBeacon = data["ID"]
         intervalo = data["seg"]
-    return index()
+        return index()
+
+@web.route('/calibrador', methods = ['POST'])
+def calibrador():
+    if request.method == 'POST':
+        global IDBeacon
+        return calibrar(IDBeacon)
 
 if __name__ == "__main__":
     # Define HOST y PUERTO para accerder
